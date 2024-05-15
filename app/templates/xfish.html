@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}XFishProject - Secret Page{% endblock %}
+{% block content %}
+    <div class="xfishfont">
+        <h2 id="messages" class="text-center pt-5 mt-5"></h2>
+        {% if username!='<NO_NAME>' %}
+            <div id="container" class="container w-25 mt-5 d-flex">
+                <div id="inner" class="mx-auto w-75">
+                    <img src="{{ url_for('static', filename=image) }}" alt="" id="xpf_pass"
+                         class="rounded img-fluid mx-auto shadow-lg highlight">
+                </div>
+            </div>
+            <div class="d-flex justify-content-center mt-5">
+                <a type="button" href="{{ url_for('static', filename=image) }}"
+                   class="btn btn-outline-light rounded-0"
+                   style="width: 15%" download>
+                    <h3>Download</h3>
+                    your participation pass
+                </a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+        let typer_index = 0,
+            txt = '{{ get_flashed_messages()[0] }}',
+            speed = 50;
+
+        (function typeWriter() {
+            if (typer_index < txt.length) {
+                document.getElementById("messages").innerHTML += txt.charAt(typer_index);
+                typer_index++;
+                setTimeout(typeWriter, speed);
+            }
+        })();
+
+        let container = document.getElementById('container');
+        let inner = document.getElementById('inner');
+        let counter = 0;
+        let updateRate = 2;
+
+        var mouse = {
+
+            x_center: 0,
+            y_center: 0,
+            x: 0,
+            y: 0,
+
+            // update relative to x and y center
+            updatePosition: function (event) {
+                var e = event || window.event;
+                this.x = e.clientX - this.x_center;
+                this.y = (e.clientY - this.y_center) * -1;
+            },
+
+            // set x and y center @ center of rectangle
+            setOrigin: function (e) {
+                this.x_center = e.offsetLeft + Math.floor(e.offsetWidth / 2)
+                this.y_center = e.offsetTop + Math.floor(e.offsetHeight / 2)
+            }
+        }
+
+        let updatePosition = (event) => {
+            mouse.updatePosition(event);
+            // where the mouse is, rotate image away from user
+            updateTransformStyle(
+                (mouse.y / (inner.offsetHeight)).toFixed(2),
+                (mouse.x / (inner.offsetWidth)).toFixed(2)
+            )
+        }
+
+        let updateTransformStyle = (x, y) => {
+            let style = `rotateX(${x}deg) rotateY(${y}deg)`;
+
+            inner.style.transform = style;
+            inner.style.webkitTransform = style;
+        }
+
+        let isTimeToUpdate = () => {
+            // update once counter reaches 10
+            return counter++ % updateRate === 0;
+        }
+
+        // invoke update on enter
+        let onMouseEnter = (event) => {
+            updatePosition(event);
+        }
+
+        // reset style on exit
+        let onMouseExit = () => {
+            inner.style = "";
+        }
+
+        let onMouseMove = (event) => {
+            if (isTimeToUpdate()) {
+                updatePosition(event);
+            }
+        }
+
+        // define callbacks for different mouse events on container
+        container.onmouseenter = onMouseEnter;
+        container.onmouseleave = onMouseExit;
+        container.onmousemove = onMouseMove;
+
+        mouse.setOrigin(container);
+    </script>
+{% endblock %}

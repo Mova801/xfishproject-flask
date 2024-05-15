@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}XFishProject - Find Message{% endblock %}
+{% block header %}
+    <div class="xfishfont">
+        <h2 id="messages" class="text-center pt-5 mt-5"></h2>
+    </div>
+{% endblock %}
+{% block content %}
+    {% if image == '' %}
+        <form method="post" enctype="multipart/form-data" action="{{ url_for('main.steganographer') }}"
+              class="d-flex flex-column mt-5 w-100">
+            <input class="form-control rounded-0 btn btn-outline-light mx-auto" type="file" style="width: 20%"
+                   id="image_with_msg" accept=".png" name="uploaded-file" required>
+            <button type="submit" class="btn btn-outline-light rounded-0 mx-auto mt-3" value="with hidden message"
+                    style="width: 20%">
+                <span class="fs-3">Analyze image</span><br>
+                for hidden messages
+            </button>
+        </form>
+    {% else %}
+        <div class="d-flex flex-column">
+            <div class="d-flex flex-column xfishfont">
+                {% if hidden_message == '<NO_MSG>' %}
+                    <div class="text-warning popout mt-5 d-flex justify-content-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                             fill="currentColor" class="bi bi-exclamation-triangle"
+                             viewBox="0 0 16 16">
+                            <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"></path>
+                            <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"></path>
+                        </svg>
+                        &nbsp;&nbsp;
+                        <h3 class="border-bottom border-warning border-5">
+                            Nessun messaggio ASCII trovato nell'immagine.
+                        </h3>
+                        &nbsp;&nbsp;
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                             fill="currentColor" class="bi bi-exclamation-triangle"
+                             viewBox="0 0 16 16">
+                            <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"></path>
+                            <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"></path>
+                        </svg>
+                    </div>
+                {% else %}
+                    <div class="row w-75 mx-auto mt-4 border-bottom d-flex rounded-top bg-body-tertiary border border-bottom-0">
+                        <div class="col-6 pt-3">
+                            <p class="fs-4 mx-auto text-center fw-bold">
+                                Immagine caricata
+                            </p>
+                        </div>
+                        <div class="col-6 pt-3">
+                            <p class="fs-4 mx-auto text-center fw-bold">
+                                Testo trovato
+                            </p>
+                        </div>
+                    </div>
+                    <div class=" row w-75 mx-auto shadow-lg bg-body-tertiary p-3 pb-4 pt-4 rounded-bottom border">
+                        <div class="col-6 d-flex flex-column border-end">
+                            <img src="{{ url_for('static', filename='uploads/'+image) }}" alt="" style="height: 50vh"
+                                 class="img-fluid mx-auto highlight">
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <div id="hidden_message" class="fs-5 text-wrap">
+                                    {{ hidden_message }}
+                                </div>
+                                <a class="btn" onclick="saveToClipboard()" style="height: 5vh" id="copy_btn"
+                                   data-bs-toggle="tooltip" data-bs-placement="top"
+                                   data-bs-custom-class="custom-tooltip"
+                                   data-bs-title="Copy to clipboard.">
+                                    <svg id='clipboard_icon' xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                         fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                                        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"></path>
+                                        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                            <div class="text-left text-secondary align-bottom popout border-start border-5">
+                                <div class="p-2 mt-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                         class="bi bi-info-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"></path>
+                                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"></path>
+                                    </svg>
+                                    <small>Immagini senza testo nascosto analizzate con la tecnica del
+                                        Least-Significant Bit non produrranno un messaggio sensato.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+{% block script %}
+    <script>
+        let typer_index = 0,
+            txt = '{{ get_flashed_messages()[0] }}',
+            speed = 50;
+
+        (function typeWriter(txt) {
+            if (typer_index < txt.length) {
+                document.getElementById("messages").innerHTML += txt.charAt(typer_index);
+                typer_index++;
+                setTimeout(typeWriter, speed, txt);
+            }
+        })(txt);
+
+        function typeNewMessage(message) {
+            document.getElementById("messages").innerHTML = '';
+            typer_index = 0;
+            typeWriter(message);
+        }
+
+        function reset_clipboard_icon() {
+            let copy_icon = document.querySelector('#clipboard_icon');
+            copy_icon.innerHTML = "<svg id='clipboard_icon' xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-clipboard' viewBox='0 0 16 16'><path d='M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z'></path><path d='M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z'></path></svg>"
+            const tooltip = bootstrap.Tooltip.getInstance('#copy_btn')
+            tooltip.setContent({'.tooltip-inner': 'Copy to clipboard!'})
+        }
+
+        function saveToClipboard() {
+            // Get the text field
+            let copy_text = document.getElementById("hidden_message").innerText;
+            navigator.clipboard.writeText(copy_text).then(() => {
+                // Change button icon
+                let copy_icon = document.querySelector('#clipboard_icon');
+                copy_icon.innerHTML = "<svg id='clipboard_icon' xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-check2' viewBox='0 0 16 16'><path d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0'></path></svg>"
+                const tooltip = bootstrap.Tooltip.getInstance('#copy_btn')
+                tooltip.setContent({'.tooltip-inner': 'Copied!'})
+                setTimeout(reset_clipboard_icon, 2000)
+            });
+        }
+    </script>
+{% endblock %}
